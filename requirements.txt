@@ -1,0 +1,9 @@
+alembic==1.11.1
+fastapi==0.100.1
+SQLAlchemy==2.0.19
+passlib==1.7.4
+psycopg2-binary==2.9.6
+python-decouple==3.8
+python-jose==3.3.0
+python-multipart==0.0.6
+uvicorn==0.23.1
