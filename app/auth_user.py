@@ -3,7 +3,7 @@ from db.models import UserModel
 from decouple import config
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from jose import JWSError, jwt
+from jose import JWSError, jwt, ExpiredSignatureError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -60,3 +60,24 @@ class UserUseCases:
             'access_token': access_token,
             'exp': exp.isoformat()
         }
+
+    def verify_token(self, access_token):
+
+        try:
+            # decodifica o token, retornando meu payload gerado na funcao de login
+            data = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        except JWSError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid access token")
+        except ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token Expired!")
+
+        user_on_db = self.db_session.query(UserModel).filter_by(username=data['sub']).first()
+
+        if user_on_db is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid access token")
